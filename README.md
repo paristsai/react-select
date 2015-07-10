@@ -1,6 +1,11 @@
 React-Select
 ============
 
+八仙塵暴名單搜尋
+Fork 了 React-Select，並且將 Select 這個 Component 新增了 show 出結果的功能
+Live demo: [paristsai.github.io/react-select](http://paristsai.github.io/react-select/)
+頁面是使用 gulp-gh-pages 才成功 deploy
+
 A Select control built with and for [React](http://facebook.github.io/react/index.html). Initially built for use in [KeystoneJS](http://www.keystonejs.com).
 
 
