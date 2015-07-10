@@ -37,6 +37,7 @@ var Select = React.createClass({
 		matchProp: React.PropTypes.string, // (any|label|value) which option property to filter on
 		multi: React.PropTypes.bool, // multi-value input
 		name: React.PropTypes.string, // field name, for hidden <input /> tag
+		addLabelText: React.PropTypes.string, // placeholder displayed when you want to add a label on a multi-value input
 		noResultsText: React.PropTypes.string, // placeholder displayed when there are no matching search results
 		onBlur: React.PropTypes.func, // onBlur handler: function(event) {}
 		onChange: React.PropTypes.func, // onChange handler: function(newValue) {}
@@ -67,6 +68,7 @@ var Select = React.createClass({
 			matchPos: 'any',
 			matchProp: 'any',
 			name: undefined,
+			addLabelText: 'Add {label} ?',
 			noResultsText: 'No results found',
 			onChange: undefined,
 			onOptionLabelClick: undefined,
@@ -135,12 +137,13 @@ var Select = React.createClass({
 			}
 		};
 
-		this.setState(this.getStateFromValue(this.props.value), function () {
-			//Executes after state change is done. Fixes issue #201
-			if (this.props.asyncOptions && this.props.autoload) {
-				this.autoloadAsyncOptions();
-			}
-		});
+		this.setState(this.getStateFromValue(this.props.value));
+	},
+
+	componentDidMount: function componentDidMount() {
+		if (this.props.asyncOptions && this.props.autoload) {
+			this.autoloadAsyncOptions();
+		}
 	},
 
 	componentWillUnmount: function componentWillUnmount() {
@@ -484,7 +487,7 @@ var Select = React.createClass({
 
 	autoloadAsyncOptions: function autoloadAsyncOptions() {
 		var self = this;
-		this.loadAsyncOptions('', {}, function () {
+		this.loadAsyncOptions(this.props.value || '', {}, function () {
 			// update with fetched but don't focus
 			self.setValue(self.props.value, false);
 		});
@@ -665,10 +668,12 @@ var Select = React.createClass({
 
 		var ops = Object.keys(this.state.filteredOptions).map(function (key) {
 			var op = this.state.filteredOptions[key];
+			var isSelected = this.state.value === op.value;
 			var isFocused = focusedValue === op.value;
 
 			var optionClass = classes({
 				'Select-option': true,
+				'is-selected': isSelected,
 				'is-focused': isFocused,
 				'is-disabled': op.disabled
 			});
@@ -687,7 +692,7 @@ var Select = React.createClass({
 			) : React.createElement(
 				'div',
 				{ ref: ref, key: 'option-' + op.value, className: optionClass, onMouseEnter: mouseEnter, onMouseLeave: mouseLeave, onMouseDown: mouseDown, onClick: mouseDown },
-				op.create ? 'Add ' + op.label + ' ?' : renderedLabel
+				op.create ? this.props.addLabelText.replace('{label}', op.label) : renderedLabel
 			);
 		}, this);
 
@@ -794,25 +799,6 @@ var Select = React.createClass({
 			);
 		}
 
-		//srart
-		//自己修改的code
-		var result;
-		var values = this.state.values[0];
-		//input的值在option中找到了 並且 menu 沒有點開 的情況下才顯示result
-		if (this.state.value && !this.state.isOpen) {
-			result = Object.keys(values).map(function (key, index) {
-				if (index != 0 || index != 13 || index != 14) {
-					return React.createElement(
-						'div',
-						null,
-						key,
-						': ',
-						values[key]
-					);
-				}
-			});
-		}
-		//end
 		return React.createElement(
 			'div',
 			{ ref: 'wrapper', className: selectClass },
@@ -827,12 +813,7 @@ var Select = React.createClass({
 				loading,
 				clear
 			),
-			menu,
-			React.createElement(
-				'span',
-				null,
-				result
-			)
+			menu
 		);
 	}
 
@@ -847,7 +828,7 @@ module.exports = Select;
 
 var React = (typeof window !== "undefined" ? window.React : typeof global !== "undefined" ? global.React : null);
 
-var Option = React.createClass({
+var Value = React.createClass({
 
 	displayName: 'Value',
 
@@ -908,7 +889,7 @@ var Option = React.createClass({
 
 });
 
-module.exports = Option;
+module.exports = Value;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}]},{},[1])(1)
