@@ -32,7 +32,7 @@ var StatesField = React.createClass({
 			country: 'AU',
 			disabled: false,
 			id: ++id,
-			selectValue: 'new-south-wales'
+			selectValue: ''
 		};
 	},
 	switchCountry: function(newCountry) {
@@ -55,15 +55,18 @@ var StatesField = React.createClass({
 		this.setState({ disabled: e.target.checked });
 	},
 	render: function() {
-		var ops = STATES[this.state.country];
+
+		// var ops = STATES[this.state.country];
+		var ops = STATES.city;
+				// console.log(ops);
+		var patient = ops[0];
+
 		return (
 			<div>
 				<label>{this.props.label}</label>
 				<Select ref="stateSelect" options={ops} disabled={this.state.disabled} value={this.state.selectValue} onChange={this.updateValue} searchable={this.props.searchable} />
 				<div className="switcher">
 					Country:
-					<CountrySelect value="AU" selected={this.state.country} onSelect={this.switchCountry}>Australia</CountrySelect>
-					<CountrySelect value="US" selected={this.state.country} onSelect={this.switchCountry}>US</CountrySelect>
 					&nbsp; <button type="button" onClick={this.focusStateSelect}>Focus Select</button>
 					&nbsp; <input type="checkbox" checked={this.state.disabled} id={'disable-states-' + this.state.id} onChange={this.toggleDisabled}/>
 					<label htmlFor={'disable-states-' + this.state.id}>Disable</label>
@@ -252,12 +255,6 @@ var CustomRenderField = React.createClass({
 React.render(
 	<div>
 		<StatesField />
-		<StatesField label="States (non-searchable):" searchable={false} />
-		<MultiSelectField label="Multiselect:"/>
-		<SelectedValuesField label="Clickable labels (labels as links):" />
-		<SelectedValuesFieldCreate label="Option Creation (tags mode):" />
-		<CustomRenderField label="Custom rendering for options and values:" />
-		<RemoteSelectField label="Remote Options:"/>
 	</div>,
 	document.getElementById('example')
 );
