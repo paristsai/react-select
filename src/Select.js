@@ -31,7 +31,6 @@ var Select = React.createClass({
 		matchProp: React.PropTypes.string,         // (any|label|value) which option property to filter on
 		multi: React.PropTypes.bool,               // multi-value input
 		name: React.PropTypes.string,              // field name, for hidden <input /> tag
-		addLabelText: React.PropTypes.string,      // placeholder displayed when you want to add a label on a multi-value input
 		noResultsText: React.PropTypes.string,     // placeholder displayed when there are no matching search results
 		onBlur: React.PropTypes.func,              // onBlur handler: function(event) {}
 		onChange: React.PropTypes.func,            // onChange handler: function(newValue) {}
@@ -62,7 +61,6 @@ var Select = React.createClass({
 			matchPos: 'any',
 			matchProp: 'any',
 			name: undefined,
-			addLabelText: 'Add {label} ?',
 			noResultsText: 'No results found',
 			onChange: undefined,
 			onOptionLabelClick: undefined,
@@ -132,13 +130,12 @@ var Select = React.createClass({
 			}
 		};
 
-		this.setState(this.getStateFromValue(this.props.value));
-	},
-
-	componentDidMount: function() {
-		if (this.props.asyncOptions && this.props.autoload) {
-			this.autoloadAsyncOptions();
-		}
+		this.setState(this.getStateFromValue(this.props.value), function(){
+			//Executes after state change is done. Fixes issue #201
+			if (this.props.asyncOptions && this.props.autoload) {
+				this.autoloadAsyncOptions();
+			}
+    });
 	},
 
 	componentWillUnmount: function() {
@@ -332,7 +329,7 @@ var Select = React.createClass({
 		if (this.props.disabled || (event.type === 'mousedown' && event.button !== 0)) {
 			return;
 		}
-		// If not focused, handleMouseDown will handle it
+		// If not focused, handleMouseDown will handle it 
 		if (!this.state.isOpen) {
 			return;
 		}
@@ -474,7 +471,7 @@ var Select = React.createClass({
 
 	autoloadAsyncOptions: function() {
 		var self = this;
-		this.loadAsyncOptions((this.props.value || ''), {}, function () {
+		this.loadAsyncOptions('', {}, function () {
 			// update with fetched but don't focus
 			self.setValue(self.props.value, false);
 		});
@@ -662,12 +659,10 @@ var Select = React.createClass({
 
 		var ops = Object.keys(this.state.filteredOptions).map(function(key) {
 			var op = this.state.filteredOptions[key];
-			var isSelected = this.state.value === op.value;
 			var isFocused = focusedValue === op.value;
 
 			var optionClass = classes({
 				'Select-option': true,
-				'is-selected': isSelected,
 				'is-focused': isFocused,
 				'is-disabled': op.disabled
 			});
@@ -682,7 +677,7 @@ var Select = React.createClass({
 			return op.disabled ? (
 				<div ref={ref} key={'option-' + op.value} className={optionClass}>{renderedLabel}</div>
 			) : (
-				<div ref={ref} key={'option-' + op.value} className={optionClass} onMouseEnter={mouseEnter} onMouseLeave={mouseLeave} onMouseDown={mouseDown} onClick={mouseDown}>{ op.create ? this.props.addLabelText.replace('{label}', op.label) : renderedLabel}</div>
+				<div ref={ref} key={'option-' + op.value} className={optionClass} onMouseEnter={mouseEnter} onMouseLeave={mouseLeave} onMouseDown={mouseDown} onClick={mouseDown}>{ op.create ? 'Add ' + op.label + ' ?' : renderedLabel}</div>
 			);
 		}, this);
 
@@ -773,6 +768,19 @@ var Select = React.createClass({
 			input = <div className="Select-input">&nbsp;</div>;
 		}
 
+		//srart 
+		//自己修改的code
+		var result;
+		var values = this.state.values[0];
+		//input的值在option中找到了 並且 menu 沒有點開 的情況下才顯示result
+		if (this.state.value && !this.state.isOpen) {
+			result = Object.keys(values).map(function(key, index) {
+				if (index != 0 || index != 13 ||  index != 14) {
+					return <div>{key}: {values[key]}</div>;
+				}
+			})
+		}
+		//end
 		return (
 			<div ref="wrapper" className={selectClass}>
 				<input type="hidden" ref="value" name={this.props.name} value={this.state.value} disabled={this.props.disabled} />
@@ -785,6 +793,10 @@ var Select = React.createClass({
 					{clear}
 				</div>
 				{menu}
+				<span>
+					{result}
+				</span>
+				
 			</div>
 		);
 	}

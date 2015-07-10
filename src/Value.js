@@ -1,6 +1,6 @@
 var React = require('react');
 
-var Value = React.createClass({
+var Option = React.createClass({
 
 	displayName: 'Value',
 
@@ -53,4 +53,4 @@ var Value = React.createClass({
 
 });
 
-module.exports = Value;
+module.exports = Option;
